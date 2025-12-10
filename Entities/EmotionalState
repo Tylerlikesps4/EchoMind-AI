@@ -1,0 +1,53 @@
+{
+  "name": "EmotionalState",
+  "type": "object",
+  "properties": {
+    "conversation_id": {
+      "type": "string",
+      "description": "Reference to conversation"
+    },
+    "detected_emotion": {
+      "type": "string",
+      "enum": [
+        "joy",
+        "sadness",
+        "anxiety",
+        "anger",
+        "excitement",
+        "calm",
+        "confused",
+        "motivated",
+        "tired",
+        "neutral"
+      ],
+      "description": "Primary emotion detected"
+    },
+    "confidence": {
+      "type": "number",
+      "description": "Confidence score 0-1"
+    },
+    "context": {
+      "type": "string",
+      "description": "What triggered this emotion"
+    },
+    "ai_response_strategy": {
+      "type": "string",
+      "enum": [
+        "supportive",
+        "celebratory",
+        "calming",
+        "motivating",
+        "listening",
+        "problem_solving"
+      ],
+      "description": "How AI should respond"
+    },
+    "message_snapshot": {
+      "type": "string",
+      "description": "The message that triggered this emotion"
+    }
+  },
+  "required": [
+    "detected_emotion"
+  ]
+}
