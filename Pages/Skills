@@ -1,0 +1,211 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, BookOpen, Trophy, TrendingUp, Clock, Target, Plus } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { motion } from 'framer-motion';
+import { toast } from 'sonner';
+
+const categoryColors = {
+    programming: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+    language: 'bg-green-500/20 text-green-400 border-green-500/30',
+    creative: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+    business: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+    personal_development: 'bg-pink-500/20 text-pink-400 border-pink-500/30',
+    health: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+    hobby: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+    academic: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30',
+    other: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
+};
+
+export default function Skills() {
+    const queryClient = useQueryClient();
+
+    const { data: skills = [], isLoading } = useQuery({
+        queryKey: ['skills'],
+        queryFn: () => base44.entities.Skill.list('-updated_date'),
+    });
+
+    const { data: sessions = [] } = useQuery({
+        queryKey: ['learningSessions'],
+        queryFn: () => base44.entities.LearningSession.list('-created_date', 50),
+    });
+
+    const activeSkills = skills.filter(s => s.status === 'learning');
+    const masteredSkills = skills.filter(s => s.status === 'mastered');
+    const interestedSkills = skills.filter(s => s.status === 'interested');
+
+    const totalSessions = sessions.length;
+    const totalProgress = skills.length > 0 
+        ? Math.round(skills.reduce((sum, s) => sum + (s.progress || 0), 0) / skills.length)
+        : 0;
+
+    return (
+        <div className="min-h-screen bg-slate-950">
+            {/* Header */}
+            <header className="border-b border-slate-800/50 bg-slate-900/50 backdrop-blur-xl sticky top-0 z-10">
+                <div className="max-w-6xl mx-auto px-4 h-16 flex items-center gap-4">
+                    <Link to={createPageUrl('Chat')}>
+                        <Button variant="ghost" size="icon" className="text-slate-400 hover:text-slate-200 rounded-xl">
+                            <ArrowLeft className="h-5 w-5" />
+                        </Button>
+                    </Link>
+                    <div>
+                        <h1 className="text-xl font-semibold text-slate-100">Learning Journey</h1>
+                        <p className="text-xs text-slate-500">Track your progress and skills</p>
+                    </div>
+                </div>
+            </header>
+
+            <main className="max-w-6xl mx-auto px-4 py-8">
+                {/* Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                        <Card className="bg-gradient-to-br from-violet-500/10 to-purple-500/10 border-violet-500/20">
+                            <CardContent className="p-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-slate-400 mb-1">Active Skills</p>
+                                        <p className="text-3xl font-bold text-violet-400">{activeSkills.length}</p>
+                                    </div>
+                                    <BookOpen className="h-10 w-10 text-violet-400/50" />
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                        <Card className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 border-emerald-500/20">
+                            <CardContent className="p-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-slate-400 mb-1">Avg Progress</p>
+                                        <p className="text-3xl font-bold text-emerald-400">{totalProgress}%</p>
+                                    </div>
+                                    <TrendingUp className="h-10 w-10 text-emerald-400/50" />
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+                        <Card className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border-yellow-500/20">
+                            <CardContent className="p-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-slate-400 mb-1">Total Sessions</p>
+                                        <p className="text-3xl font-bold text-yellow-400">{totalSessions}</p>
+                                    </div>
+                                    <Clock className="h-10 w-10 text-yellow-400/50" />
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                </div>
+
+                {/* Active Skills */}
+                {activeSkills.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="mb-8"
+                    >
+                        <h2 className="text-lg font-semibold text-slate-100 mb-4 flex items-center gap-2">
+                            <Target className="h-5 w-5 text-violet-400" />
+                            Currently Learning
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {activeSkills.map((skill) => (
+                                <Card key={skill.id} className="bg-slate-900/50 border-slate-800/50 backdrop-blur">
+                                    <CardHeader>
+                                        <div className="flex items-start justify-between">
+                                            <div className="flex-1 min-w-0">
+                                                <CardTitle className="text-slate-100 mb-2">{skill.name}</CardTitle>
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <Badge variant="secondary" className={`text-xs border ${categoryColors[skill.category]}`}>
+                                                        {skill.category.replace(/_/g, ' ')}
+                                                    </Badge>
+                                                    <Badge variant="outline" className="text-xs text-slate-400 border-slate-600">
+                                                        {skill.difficulty}
+                                                    </Badge>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-2xl font-bold text-violet-400">{skill.progress}%</p>
+                                                <p className="text-xs text-slate-500">{skill.sessions_completed} sessions</p>
+                                            </div>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                        {skill.description && (
+                                            <p className="text-sm text-slate-400 mb-4">{skill.description}</p>
+                                        )}
+                                        <Progress value={skill.progress} className="h-2 bg-slate-800 mb-3" />
+                                        {skill.next_lesson && (
+                                            <div className="bg-slate-800/50 rounded-lg p-3">
+                                                <p className="text-xs text-slate-500 mb-1">Next lesson:</p>
+                                                <p className="text-sm text-violet-400">{skill.next_lesson}</p>
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
+
+                {/* Mastered Skills */}
+                {masteredSkills.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 }}
+                        className="mb-8"
+                    >
+                        <h2 className="text-lg font-semibold text-slate-100 mb-4 flex items-center gap-2">
+                            <Trophy className="h-5 w-5 text-yellow-400" />
+                            Mastered Skills
+                        </h2>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {masteredSkills.map((skill) => (
+                                <Card key={skill.id} className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border-yellow-500/20">
+                                    <CardContent className="p-4 text-center">
+                                        <Trophy className="h-6 w-6 text-yellow-400 mx-auto mb-2" />
+                                        <p className="text-sm font-medium text-slate-200">{skill.name}</p>
+                                        <Badge variant="secondary" className={`text-xs mt-2 ${categoryColors[skill.category]}`}>
+                                            {skill.category.replace(/_/g, ' ')}
+                                        </Badge>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
+
+                {/* Empty State */}
+                {skills.length === 0 && !isLoading && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-center py-16"
+                    >
+                        <BookOpen className="h-16 w-16 text-slate-700 mx-auto mb-4" />
+                        <h3 className="text-xl font-semibold text-slate-300 mb-2">No skills yet</h3>
+                        <p className="text-slate-500 mb-6">Start your learning journey by chatting with your AI</p>
+                        <Link to={createPageUrl('Chat')}>
+                            <Button className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500">
+                                <Plus className="h-4 w-4 mr-2" />
+                                Start Learning
+                            </Button>
+                        </Link>
+                    </motion.div>
+                )}
+            </main>
+        </div>
+    );
+}
