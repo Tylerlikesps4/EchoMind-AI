@@ -1,0 +1,243 @@
+import { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Sparkles, Save, X, Plus, User, Brain, Heart, BookOpen } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { toast } from 'sonner';
+import { motion } from 'framer-motion';
+
+const personalities = [
+    { value: 'friendly', label: 'Friendly', desc: 'Warm and casual', icon: Heart },
+    { value: 'professional', label: 'Professional', desc: 'Polished and focused', icon: Brain },
+    { value: 'witty', label: 'Witty', desc: 'Clever and humorous', icon: Sparkles },
+    { value: 'empathetic', label: 'Empathetic', desc: 'Understanding and supportive', icon: Heart },
+    { value: 'adventurous', label: 'Adventurous', desc: 'Bold and curious', icon: Sparkles },
+];
+
+export default function Settings() {
+    const queryClient = useQueryClient();
+    const [formData, setFormData] = useState({
+        ai_name: 'ARIA',
+        user_nickname: '',
+        personality_style: 'friendly',
+        interests: [],
+    });
+    const [newInterest, setNewInterest] = useState('');
+
+    const { data: profiles, isLoading } = useQuery({
+        queryKey: ['userProfile'],
+        queryFn: () => base44.entities.UserProfile.list(),
+    });
+
+    const userProfile = profiles?.[0];
+
+    useEffect(() => {
+        if (userProfile) {
+            setFormData({
+                ai_name: userProfile.ai_name || 'ARIA',
+                user_nickname: userProfile.user_nickname || '',
+                personality_style: userProfile.personality_style || 'friendly',
+                interests: userProfile.interests || [],
+            });
+        }
+    }, [userProfile]);
+
+    const saveMutation = useMutation({
+        mutationFn: async (data) => {
+            if (userProfile) {
+                return base44.entities.UserProfile.update(userProfile.id, data);
+            } else {
+                return base44.entities.UserProfile.create(data);
+            }
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+            toast.success('Settings saved successfully!');
+        },
+        onError: () => {
+            toast.error('Failed to save settings');
+        }
+    });
+
+    const handleSave = () => {
+        saveMutation.mutate(formData);
+    };
+
+    const addInterest = () => {
+        if (newInterest.trim() && !formData.interests.includes(newInterest.trim())) {
+            setFormData(prev => ({
+                ...prev,
+                interests: [...prev.interests, newInterest.trim()]
+            }));
+            setNewInterest('');
+        }
+    };
+
+    const removeInterest = (interest) => {
+        setFormData(prev => ({
+            ...prev,
+            interests: prev.interests.filter(i => i !== interest)
+        }));
+    };
+
+    return (
+        <div className="min-h-screen bg-slate-950">
+            {/* Header */}
+            <header className="border-b border-slate-800/50 bg-slate-900/50 backdrop-blur-xl sticky top-0 z-10">
+                <div className="max-w-2xl mx-auto px-4 h-16 flex items-center gap-4">
+                    <Link to={createPageUrl('Chat')}>
+                        <Button variant="ghost" size="icon" className="text-slate-400 hover:text-slate-200 rounded-xl">
+                            <ArrowLeft className="h-5 w-5" />
+                        </Button>
+                    </Link>
+                    <h1 className="text-xl font-semibold text-slate-100">Settings</h1>
+                </div>
+            </header>
+
+            <main className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+                {/* AI Identity */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                >
+                    <Card className="bg-slate-900/50 border-slate-800/50 backdrop-blur">
+                        <CardHeader>
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center">
+                                    <Sparkles className="h-5 w-5 text-white" />
+                                </div>
+                                <div>
+                                    <CardTitle className="text-slate-100">AI Identity</CardTitle>
+                                    <CardDescription className="text-slate-500">Customize your AI companion</CardDescription>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="space-y-2">
+                                <Label className="text-slate-300">AI Name</Label>
+                                <Input
+                                    value={formData.ai_name}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, ai_name: e.target.value }))}
+                                    placeholder="ARIA, J.A.R.V.I.S., etc."
+                                    className="bg-slate-800/50 border-slate-700/50 text-slate-100 rounded-xl"
+                                />
+                                <p className="text-xs text-slate-500">What should your AI be called?</p>
+                            </div>
+
+                            <div className="space-y-3">
+                                <Label className="text-slate-300">Personality Style</Label>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {personalities.map((p) => (
+                                        <button
+                                            key={p.value}
+                                            onClick={() => setFormData(prev => ({ ...prev, personality_style: p.value }))}
+                                            className={`p-4 rounded-2xl border text-left transition-all ${
+                                                formData.personality_style === p.value
+                                                    ? 'bg-violet-500/20 border-violet-500/50 text-violet-200'
+                                                    : 'bg-slate-800/30 border-slate-700/30 text-slate-300 hover:bg-slate-800/50'
+                                            }`}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <p.icon className="h-5 w-5" />
+                                                <div>
+                                                    <p className="font-medium">{p.label}</p>
+                                                    <p className="text-xs text-slate-500">{p.desc}</p>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+
+                {/* Your Profile */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                >
+                    <Card className="bg-slate-900/50 border-slate-800/50 backdrop-blur">
+                        <CardHeader>
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                                    <User className="h-5 w-5 text-white" />
+                                </div>
+                                <div>
+                                    <CardTitle className="text-slate-100">Your Profile</CardTitle>
+                                    <CardDescription className="text-slate-500">Help your AI know you better</CardDescription>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="space-y-2">
+                                <Label className="text-slate-300">Your Nickname</Label>
+                                <Input
+                                    value={formData.user_nickname}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, user_nickname: e.target.value }))}
+                                    placeholder="What should the AI call you?"
+                                    className="bg-slate-800/50 border-slate-700/50 text-slate-100 rounded-xl"
+                                />
+                            </div>
+
+                            <div className="space-y-3">
+                                <Label className="text-slate-300">Your Interests</Label>
+                                <div className="flex gap-2">
+                                    <Input
+                                        value={newInterest}
+                                        onChange={(e) => setNewInterest(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addInterest())}
+                                        placeholder="Add an interest..."
+                                        className="bg-slate-800/50 border-slate-700/50 text-slate-100 rounded-xl"
+                                    />
+                                    <Button onClick={addInterest} size="icon" className="rounded-xl bg-slate-700 hover:bg-slate-600">
+                                        <Plus className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {formData.interests.map((interest) => (
+                                        <Badge 
+                                            key={interest} 
+                                            variant="secondary"
+                                            className="bg-slate-800/50 text-slate-300 border border-slate-700/50 px-3 py-1.5 rounded-full"
+                                        >
+                                            {interest}
+                                            <button onClick={() => removeInterest(interest)} className="ml-2 hover:text-red-400">
+                                                <X className="h-3 w-3" />
+                                            </button>
+                                        </Badge>
+                                    ))}
+                                </div>
+                                <p className="text-xs text-slate-500">Your AI will use these to personalize conversations</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+
+                {/* Save Button */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                >
+                    <Button
+                        onClick={handleSave}
+                        disabled={saveMutation.isPending}
+                        className="w-full h-14 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 font-medium text-lg shadow-xl shadow-purple-500/20"
+                    >
+                        <Save className="h-5 w-5 mr-2" />
+                        {saveMutation.isPending ? 'Saving...' : 'Save Settings'}
+                    </Button>
+                </motion.div>
+            </main>
+        </div>
+    );
+}
