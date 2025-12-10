@@ -1,0 +1,60 @@
+{
+  "name": "Memory",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Brief title of the memory"
+    },
+    "content": {
+      "type": "string",
+      "description": "The memory content"
+    },
+    "memory_type": {
+      "type": "string",
+      "enum": [
+        "fact",
+        "preference",
+        "story",
+        "achievement",
+        "goal",
+        "relationship",
+        "emotion",
+        "skill"
+      ],
+      "description": "Type of memory"
+    },
+    "importance": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "medium",
+      "description": "How important this memory is"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags for quick retrieval"
+    },
+    "context": {
+      "type": "string",
+      "description": "When/how this was learned"
+    },
+    "last_referenced": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this memory was last used"
+    }
+  },
+  "required": [
+    "title",
+    "content",
+    "memory_type"
+  ]
+}
