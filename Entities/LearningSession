@@ -1,0 +1,55 @@
+{
+  "name": "LearningSession",
+  "type": "object",
+  "properties": {
+    "skill_id": {
+      "type": "string",
+      "description": "Reference to skill"
+    },
+    "conversation_id": {
+      "type": "string",
+      "description": "Reference to conversation"
+    },
+    "session_type": {
+      "type": "string",
+      "enum": [
+        "lesson",
+        "practice",
+        "quiz",
+        "discussion",
+        "project"
+      ],
+      "default": "lesson"
+    },
+    "topic": {
+      "type": "string",
+      "description": "What was covered"
+    },
+    "duration_minutes": {
+      "type": "number",
+      "description": "How long the session lasted"
+    },
+    "user_understanding": {
+      "type": "string",
+      "enum": [
+        "struggling",
+        "getting_it",
+        "confident",
+        "mastered"
+      ],
+      "description": "User's comprehension level"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Session notes and key takeaways"
+    },
+    "homework": {
+      "type": "string",
+      "description": "Practice exercises or next steps"
+    }
+  },
+  "required": [
+    "skill_id",
+    "topic"
+  ]
+}
