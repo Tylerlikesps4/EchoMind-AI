@@ -1,0 +1,74 @@
+{
+  "name": "Goal",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Goal or project title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "short_term",
+        "long_term",
+        "project",
+        "habit",
+        "milestone"
+      ],
+      "default": "short_term"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planning",
+        "active",
+        "paused",
+        "completed",
+        "abandoned"
+      ],
+      "default": "planning"
+    },
+    "progress": {
+      "type": "number",
+      "default": 0,
+      "description": "Progress percentage 0-100"
+    },
+    "target_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "related_skills": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Skills needed or being developed"
+    },
+    "related_interests": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Related user interests"
+    },
+    "collaboration_notes": {
+      "type": "string",
+      "description": "How AI is helping with this goal"
+    },
+    "milestones": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Key milestones achieved"
+    }
+  },
+  "required": [
+    "title",
+    "type"
+  ]
+}
