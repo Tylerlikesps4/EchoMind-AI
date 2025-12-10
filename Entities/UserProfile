@@ -1,0 +1,42 @@
+{
+  "name": "UserProfile",
+  "type": "object",
+  "properties": {
+    "ai_name": {
+      "type": "string",
+      "default": "ARIA",
+      "description": "Custom name for the AI companion"
+    },
+    "user_nickname": {
+      "type": "string",
+      "description": "What the AI should call the user"
+    },
+    "personality_style": {
+      "type": "string",
+      "enum": [
+        "friendly",
+        "professional",
+        "witty",
+        "empathetic",
+        "adventurous"
+      ],
+      "default": "friendly",
+      "description": "AI personality style preference"
+    },
+    "interests": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "User's interests for personalized conversations"
+    },
+    "memories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Important things the AI remembers about the user"
+    }
+  },
+  "required": []
+}
