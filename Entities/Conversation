@@ -1,0 +1,33 @@
+{
+  "name": "Conversation",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Title of the conversation"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Brief summary of what was discussed"
+    },
+    "mood": {
+      "type": "string",
+      "enum": [
+        "curious",
+        "supportive",
+        "playful",
+        "focused",
+        "reflective"
+      ],
+      "default": "curious",
+      "description": "AI's current mood in this conversation"
+    },
+    "last_message_preview": {
+      "type": "string",
+      "description": "Preview of the last message"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}
