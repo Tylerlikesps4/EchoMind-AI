@@ -1,0 +1,85 @@
+import { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import { Copy, CheckCircle2, Sparkles } from 'lucide-react';
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { motion } from "framer-motion";
+
+export default function MessageBubble({ message, aiName = "ARIA" }) {
+    const isUser = message.role === 'user';
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(message.content);
+        setCopied(true);
+        toast.success('Copied to clipboard');
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    return (
+        <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className={cn("flex gap-3 group", isUser ? "justify-end" : "justify-start")}
+        >
+            {!isUser && (
+                <div className="relative flex-shrink-0">
+                    <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-purple-500/20">
+                        <Sparkles className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full bg-emerald-400 border-2 border-slate-950" />
+                </div>
+            )}
+            
+            <div className={cn("max-w-[75%] relative", isUser && "flex flex-col items-end")}>
+                {!isUser && (
+                    <span className="text-xs text-slate-500 mb-1.5 ml-1 font-medium">{aiName}</span>
+                )}
+                
+                <div className={cn(
+                    "rounded-3xl px-5 py-3.5 relative",
+                    isUser 
+                        ? "bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-lg shadow-purple-500/20" 
+                        : "bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 text-slate-100"
+                )}>
+                    {isUser ? (
+                        <p className="text-[15px] leading-relaxed">{message.content}</p>
+                    ) : (
+                        <ReactMarkdown 
+                            className="text-[15px] prose prose-invert prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 prose-p:leading-relaxed prose-p:text-slate-200"
+                            components={{
+                                p: ({ children }) => <p className="my-1.5 leading-relaxed">{children}</p>,
+                                a: ({ children, ...props }) => (
+                                    <a {...props} target="_blank" rel="noopener noreferrer" className="text-violet-400 hover:text-violet-300 underline underline-offset-2">{children}</a>
+                                ),
+                                code: ({ inline, children }) => 
+                                    inline ? (
+                                        <code className="px-1.5 py-0.5 rounded-md bg-slate-700/50 text-violet-300 text-sm font-mono">{children}</code>
+                                    ) : (
+                                        <pre className="bg-slate-900/80 rounded-xl p-4 overflow-x-auto my-3">
+                                            <code className="text-sm text-slate-300 font-mono">{children}</code>
+                                        </pre>
+                                    ),
+                                ul: ({ children }) => <ul className="my-2 ml-4 list-disc text-slate-300">{children}</ul>,
+                                ol: ({ children }) => <ol className="my-2 ml-4 list-decimal text-slate-300">{children}</ol>,
+                            }}
+                        >
+                            {message.content}
+                        </ReactMarkdown>
+                    )}
+                </div>
+
+                {!isUser && message.content && (
+                    <button 
+                        onClick={handleCopy}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity absolute -bottom-6 left-1 text-xs text-slate-500 hover:text-slate-300 flex items-center gap-1"
+                    >
+                        {copied ? <CheckCircle2 className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                        {copied ? 'Copied' : 'Copy'}
+                    </button>
+                )}
+            </div>
+        </motion.div>
+    );
+}
