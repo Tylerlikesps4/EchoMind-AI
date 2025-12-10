@@ -1,0 +1,70 @@
+{
+  "name": "MemoryInsight",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Insight title"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Curated summary of memories and patterns"
+    },
+    "insight_type": {
+      "type": "string",
+      "enum": [
+        "reflection",
+        "achievement_highlight",
+        "growth_pattern",
+        "recommendation",
+        "milestone"
+      ],
+      "default": "reflection"
+    },
+    "time_period": {
+      "type": "string",
+      "description": "e.g., 'This week', 'This month'"
+    },
+    "related_memories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Memory IDs referenced"
+    },
+    "key_themes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Main themes identified"
+    },
+    "achievements_highlighted": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Achievements to celebrate"
+    },
+    "growth_areas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Areas showing growth"
+    },
+    "encouragement": {
+      "type": "string",
+      "description": "Personalized encouraging message"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "title",
+    "summary",
+    "insight_type"
+  ]
+}
