@@ -1,0 +1,154 @@
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Target, Zap, Lightbulb, Sparkles, ChevronRight, TrendingUp } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+export default function ProactiveSuggestions({ onSendMessage, conversationId }) {
+    const { data: goals = [] } = useQuery({
+        queryKey: ['goals'],
+        queryFn: () => base44.entities.Goal.filter({ status: 'active' }, '-updated_date', 3),
+    });
+
+    const { data: synergies = [] } = useQuery({
+        queryKey: ['skillSynergies'],
+        queryFn: () => base44.entities.SkillSynergy.filter({ status: 'suggested' }, '-created_date', 2),
+    });
+
+    const { data: insights = [] } = useQuery({
+        queryKey: ['memoryInsights'],
+        queryFn: () => base44.entities.MemoryInsight.filter({ is_read: false }, '-created_date', 1),
+    });
+
+    const hasContent = goals.length > 0 || synergies.length > 0 || insights.length > 0;
+
+    if (!hasContent) return null;
+
+    return (
+        <div className="px-4 pb-4">
+            <ScrollArea className="w-full">
+                <div className="flex gap-3 pb-2">
+                    <AnimatePresence>
+                        {/* Active Goals */}
+                        {goals.map((goal) => (
+                            <motion.div
+                                key={goal.id}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                            >
+                                <Card 
+                                    className="bg-gradient-to-br from-violet-500/10 to-purple-500/10 border-violet-500/30 backdrop-blur cursor-pointer hover:from-violet-500/20 hover:to-purple-500/20 transition-all min-w-[280px]"
+                                    onClick={() => onSendMessage(`Let's work on my goal: ${goal.title}`)}
+                                >
+                                    <div className="p-4">
+                                        <div className="flex items-start gap-3">
+                                            <div className="h-10 w-10 rounded-xl bg-violet-500/20 flex items-center justify-center flex-shrink-0">
+                                                <Target className="h-5 w-5 text-violet-400" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <Badge variant="secondary" className="text-xs bg-violet-500/20 text-violet-300 border-violet-500/30">
+                                                        Active Goal
+                                                    </Badge>
+                                                </div>
+                                                <p className="text-sm font-medium text-slate-100 mb-1">{goal.title}</p>
+                                                <p className="text-xs text-slate-400 line-clamp-2 mb-2">{goal.description}</p>
+                                                {goal.progress > 0 && (
+                                                    <div className="flex items-center gap-2 text-xs text-violet-400">
+                                                        <TrendingUp className="h-3 w-3" />
+                                                        {goal.progress}% complete
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <ChevronRight className="h-4 w-4 text-slate-500 flex-shrink-0 mt-1" />
+                                        </div>
+                                    </div>
+                                </Card>
+                            </motion.div>
+                        ))}
+
+                        {/* Skill Synergies */}
+                        {synergies.map((synergy) => (
+                            <motion.div
+                                key={synergy.id}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                            >
+                                <Card 
+                                    className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border-emerald-500/30 backdrop-blur cursor-pointer hover:from-emerald-500/20 hover:to-teal-500/20 transition-all min-w-[280px]"
+                                    onClick={() => onSendMessage(`Tell me more about: ${synergy.title}`)}
+                                >
+                                    <div className="p-4">
+                                        <div className="flex items-start gap-3">
+                                            <div className="h-10 w-10 rounded-xl bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                                                <Zap className="h-5 w-5 text-emerald-400" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <Badge variant="secondary" className="text-xs bg-emerald-500/20 text-emerald-300 border-emerald-500/30">
+                                                        Skill Synergy
+                                                    </Badge>
+                                                </div>
+                                                <p className="text-sm font-medium text-slate-100 mb-1">{synergy.title}</p>
+                                                <p className="text-xs text-slate-400 line-clamp-2 mb-2">{synergy.description}</p>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {synergy.skill_names?.slice(0, 2).map((skill, i) => (
+                                                        <Badge key={i} variant="outline" className="text-xs border-emerald-500/30 text-emerald-300">
+                                                            {skill}
+                                                        </Badge>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <ChevronRight className="h-4 w-4 text-slate-500 flex-shrink-0 mt-1" />
+                                        </div>
+                                    </div>
+                                </Card>
+                            </motion.div>
+                        ))}
+
+                        {/* Memory Insights */}
+                        {insights.map((insight) => (
+                            <motion.div
+                                key={insight.id}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                            >
+                                <Card 
+                                    className="bg-gradient-to-br from-pink-500/10 to-rose-500/10 border-pink-500/30 backdrop-blur cursor-pointer hover:from-pink-500/20 hover:to-rose-500/20 transition-all min-w-[280px]"
+                                    onClick={() => onSendMessage(`Show me my ${insight.insight_type} insight: ${insight.title}`)}
+                                >
+                                    <div className="p-4">
+                                        <div className="flex items-start gap-3">
+                                            <div className="h-10 w-10 rounded-xl bg-pink-500/20 flex items-center justify-center flex-shrink-0">
+                                                <Sparkles className="h-5 w-5 text-pink-400" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <Badge variant="secondary" className="text-xs bg-pink-500/20 text-pink-300 border-pink-500/30">
+                                                        Memory Insight
+                                                    </Badge>
+                                                </div>
+                                                <p className="text-sm font-medium text-slate-100 mb-1">{insight.title}</p>
+                                                <p className="text-xs text-slate-400 line-clamp-2 mb-2">{insight.summary}</p>
+                                                {insight.time_period && (
+                                                    <p className="text-xs text-pink-400">{insight.time_period}</p>
+                                                )}
+                                            </div>
+                                            <ChevronRight className="h-4 w-4 text-slate-500 flex-shrink-0 mt-1" />
+                                        </div>
+                                    </div>
+                                </Card>
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
+                </div>
+            </ScrollArea>
+        </div>
+    );
+}
