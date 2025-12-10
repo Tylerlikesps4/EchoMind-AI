@@ -1,0 +1,70 @@
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
+import { Card } from "@/components/ui/card";
+import { Heart, Sparkles, Smile, Frown, Zap, Wind, AlertCircle, Trophy, Battery, Meh } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const emotionConfig = {
+    joy: { icon: Smile, color: 'text-yellow-400', bg: 'bg-yellow-500/20', label: 'Joyful' },
+    sadness: { icon: Frown, color: 'text-blue-400', bg: 'bg-blue-500/20', label: 'Sad' },
+    anxiety: { icon: AlertCircle, color: 'text-orange-400', bg: 'bg-orange-500/20', label: 'Anxious' },
+    anger: { icon: Zap, color: 'text-red-400', bg: 'bg-red-500/20', label: 'Angry' },
+    excitement: { icon: Sparkles, color: 'text-purple-400', bg: 'bg-purple-500/20', label: 'Excited' },
+    calm: { icon: Wind, color: 'text-green-400', bg: 'bg-green-500/20', label: 'Calm' },
+    confused: { icon: AlertCircle, color: 'text-slate-400', bg: 'bg-slate-500/20', label: 'Confused' },
+    motivated: { icon: Trophy, color: 'text-emerald-400', bg: 'bg-emerald-500/20', label: 'Motivated' },
+    tired: { icon: Battery, color: 'text-indigo-400', bg: 'bg-indigo-500/20', label: 'Tired' },
+    neutral: { icon: Meh, color: 'text-slate-400', bg: 'bg-slate-500/20', label: 'Neutral' },
+};
+
+export default function EmotionalInsights({ conversationId }) {
+    const { data: emotionalStates = [] } = useQuery({
+        queryKey: ['emotionalStates', conversationId],
+        queryFn: () => base44.entities.EmotionalState.filter(
+            { conversation_id: conversationId },
+            '-created_date',
+            5
+        ),
+        enabled: !!conversationId,
+    });
+
+    if (!emotionalStates.length) return null;
+
+    const latestEmotion = emotionalStates[0];
+    const config = emotionConfig[latestEmotion.detected_emotion] || emotionConfig.neutral;
+    const Icon = config.icon;
+
+    return (
+        <AnimatePresence>
+            <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="px-4 pb-4"
+            >
+                <Card className="bg-slate-800/30 border-slate-700/30 backdrop-blur p-4">
+                    <div className="flex items-center gap-3">
+                        <div className={`h-10 w-10 rounded-xl ${config.bg} flex items-center justify-center`}>
+                            <Icon className={`h-5 w-5 ${config.color}`} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                                <Heart className="h-3 w-3 text-pink-400" />
+                                <span className="text-xs text-slate-400 font-medium">Emotional Insight</span>
+                            </div>
+                            <p className="text-sm text-slate-200 mt-0.5">
+                                I sense you're feeling <span className={`font-medium ${config.color}`}>{config.label.toLowerCase()}</span>
+                                {latestEmotion.context && (
+                                    <span className="text-slate-400"> - {latestEmotion.context}</span>
+                                )}
+                            </p>
+                        </div>
+                        <div className="text-xs text-slate-500">
+                            {Math.round(latestEmotion.confidence * 100)}%
+                        </div>
+                    </div>
+                </Card>
+            </motion.div>
+        </AnimatePresence>
+    );
+}
