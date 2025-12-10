@@ -1,0 +1,168 @@
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Target, CheckCircle2, Play, Pause, Clock, Plus, TrendingUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { motion } from 'framer-motion';
+
+const statusConfig = {
+    planning: { icon: Clock, color: 'text-slate-400', bg: 'bg-slate-500/20' },
+    active: { icon: Play, color: 'text-emerald-400', bg: 'bg-emerald-500/20' },
+    paused: { icon: Pause, color: 'text-yellow-400', bg: 'bg-yellow-500/20' },
+    completed: { icon: CheckCircle2, color: 'text-green-400', bg: 'bg-green-500/20' },
+};
+
+export default function Goals() {
+    const { data: goals = [], isLoading } = useQuery({
+        queryKey: ['goals'],
+        queryFn: () => base44.entities.Goal.list('-updated_date'),
+    });
+
+    const activeGoals = goals.filter(g => g.status === 'active');
+    const completedGoals = goals.filter(g => g.status === 'completed');
+    const planningGoals = goals.filter(g => g.status === 'planning');
+
+    return (
+        <div className="min-h-screen bg-slate-950">
+            <header className="border-b border-slate-800/50 bg-slate-900/50 backdrop-blur-xl sticky top-0 z-10">
+                <div className="max-w-6xl mx-auto px-4 h-16 flex items-center gap-4">
+                    <Link to={createPageUrl('Chat')}>
+                        <Button variant="ghost" size="icon" className="text-slate-400 hover:text-slate-200 rounded-xl">
+                            <ArrowLeft className="h-5 w-5" />
+                        </Button>
+                    </Link>
+                    <div>
+                        <h1 className="text-xl font-semibold text-slate-100">Goals & Projects</h1>
+                        <p className="text-xs text-slate-500">Collaborate with ARIA on your ambitions</p>
+                    </div>
+                </div>
+            </header>
+
+            <main className="max-w-6xl mx-auto px-4 py-8">
+                {/* Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                        <Card className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 border-emerald-500/20">
+                            <CardContent className="p-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-slate-400 mb-1">Active Goals</p>
+                                        <p className="text-3xl font-bold text-emerald-400">{activeGoals.length}</p>
+                                    </div>
+                                    <Target className="h-10 w-10 text-emerald-400/50" />
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                        <Card className="bg-gradient-to-br from-green-500/10 to-teal-500/10 border-green-500/20">
+                            <CardContent className="p-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-slate-400 mb-1">Completed</p>
+                                        <p className="text-3xl font-bold text-green-400">{completedGoals.length}</p>
+                                    </div>
+                                    <CheckCircle2 className="h-10 w-10 text-green-400/50" />
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+                        <Card className="bg-gradient-to-br from-violet-500/10 to-purple-500/10 border-violet-500/20">
+                            <CardContent className="p-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-slate-400 mb-1">In Planning</p>
+                                        <p className="text-3xl font-bold text-violet-400">{planningGoals.length}</p>
+                                    </div>
+                                    <Clock className="h-10 w-10 text-violet-400/50" />
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                </div>
+
+                {/* Active Goals */}
+                {activeGoals.length > 0 && (
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="mb-8">
+                        <h2 className="text-lg font-semibold text-slate-100 mb-4 flex items-center gap-2">
+                            <Play className="h-5 w-5 text-emerald-400" />
+                            Active Goals
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {activeGoals.map((goal) => {
+                                const config = statusConfig[goal.status];
+                                const Icon = config.icon;
+                                return (
+                                    <Card key={goal.id} className="bg-slate-900/50 border-slate-800/50 backdrop-blur">
+                                        <CardHeader>
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <div className={`h-8 w-8 rounded-lg ${config.bg} flex items-center justify-center`}>
+                                                            <Icon className={`h-4 w-4 ${config.color}`} />
+                                                        </div>
+                                                        <CardTitle className="text-slate-100">{goal.title}</CardTitle>
+                                                    </div>
+                                                    <Badge variant="secondary" className="text-xs bg-violet-500/20 text-violet-300 border-violet-500/30">
+                                                        {goal.type.replace(/_/g, ' ')}
+                                                    </Badge>
+                                                </div>
+                                                {goal.progress > 0 && (
+                                                    <div className="text-right">
+                                                        <p className="text-2xl font-bold text-emerald-400">{goal.progress}%</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </CardHeader>
+                                        <CardContent>
+                                            {goal.description && (
+                                                <p className="text-sm text-slate-400 mb-4">{goal.description}</p>
+                                            )}
+                                            <Progress value={goal.progress} className="h-2 bg-slate-800 mb-3" />
+                                            {goal.collaboration_notes && (
+                                                <div className="bg-violet-500/10 border border-violet-500/20 rounded-lg p-3 mb-3">
+                                                    <p className="text-xs text-violet-300">{goal.collaboration_notes}</p>
+                                                </div>
+                                            )}
+                                            {goal.related_skills?.length > 0 && (
+                                                <div className="flex flex-wrap gap-1">
+                                                    {goal.related_skills.map((skill, i) => (
+                                                        <Badge key={i} variant="outline" className="text-xs border-slate-600 text-slate-400">
+                                                            {skill}
+                                                        </Badge>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                );
+                            })}
+                        </div>
+                    </motion.div>
+                )}
+
+                {/* Empty State */}
+                {goals.length === 0 && !isLoading && (
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center py-16">
+                        <Target className="h-16 w-16 text-slate-700 mx-auto mb-4" />
+                        <h3 className="text-xl font-semibold text-slate-300 mb-2">No goals yet</h3>
+                        <p className="text-slate-500 mb-6">Share your goals with ARIA and collaborate together</p>
+                        <Link to={createPageUrl('Chat')}>
+                            <Button className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500">
+                                <Plus className="h-4 w-4 mr-2" />
+                                Start Collaborating
+                            </Button>
+                        </Link>
+                    </motion.div>
+                )}
+            </main>
+        </div>
+    );
+}
