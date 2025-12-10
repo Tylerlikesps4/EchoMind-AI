@@ -1,0 +1,72 @@
+{
+  "name": "Skill",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the skill"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "programming",
+        "language",
+        "creative",
+        "business",
+        "personal_development",
+        "health",
+        "hobby",
+        "academic",
+        "other"
+      ],
+      "description": "Skill category"
+    },
+    "description": {
+      "type": "string",
+      "description": "What this skill is about"
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "default": "beginner"
+    },
+    "progress": {
+      "type": "number",
+      "default": 0,
+      "description": "Progress percentage 0-100"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "learning",
+        "teaching",
+        "mastered",
+        "interested"
+      ],
+      "default": "interested"
+    },
+    "sessions_completed": {
+      "type": "number",
+      "default": 0
+    },
+    "next_lesson": {
+      "type": "string",
+      "description": "What to learn next"
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Useful resources and links"
+    }
+  },
+  "required": [
+    "name",
+    "category"
+  ]
+}
