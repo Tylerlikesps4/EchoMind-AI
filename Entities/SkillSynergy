@@ -1,0 +1,60 @@
+{
+  "name": "SkillSynergy",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Synergy idea title"
+    },
+    "description": {
+      "type": "string",
+      "description": "How skills can be combined"
+    },
+    "skill_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Skills to combine"
+    },
+    "skill_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Names of skills for display"
+    },
+    "practical_application": {
+      "type": "string",
+      "description": "Real-world application idea"
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": [
+        "easy",
+        "moderate",
+        "challenging"
+      ],
+      "default": "moderate"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "suggested",
+        "considering",
+        "planning",
+        "in_progress",
+        "completed"
+      ],
+      "default": "suggested"
+    },
+    "potential_impact": {
+      "type": "string",
+      "description": "How this could benefit the user"
+    }
+  },
+  "required": [
+    "title",
+    "skill_names"
+  ]
+}
